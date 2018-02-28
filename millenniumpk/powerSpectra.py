@@ -4,8 +4,11 @@ import sys,glob,fnmatch
 import numpy as np
 import pkg_resources
 from .hdf5 import HDF5
+from .utils.progress import Progress
+from scipy.integrate import romb,romberg
 from scipy.interpolate import interp1d
 
+Pi = 3.1415927
 
 class powerSpectrum(object):
 
@@ -85,12 +88,11 @@ class MillenniumPowerSpectrum(HDF5):
         funcname = self.__class__.__name__+"."+sys._getframe().f_code.co_name
         datafile = pkg_resources.resource_filename(__name__,"datasets/millenniumWMAP1_matterPowerSpectra.hdf5")
         # Initalise HDF5 class
-        super(MillenniumPowerSpectra, self).__init__(datafile,'r')
+        super(MillenniumPowerSpectrum, self).__init__(datafile,'r')
         self.redshift = np.array(self.fileObj["redshift"])[::-1]
         self.snapshot = np.array(self.fileObj["snapshot"])[::-1]
         self.k = np.array(self.fileObj["Snapshots/000/k"])
         self.zPk = np.zeros((len(self.k),len(self.redshift)),dtype=float)
-        HDF.close()
         return
 
     def readSnapshot(self,snapNumber,property):
@@ -107,18 +109,17 @@ class MillenniumPowerSpectrum(HDF5):
 
     def read(self,property):
         self.zPk = np.zeros((len(self.k),len(self.redshift)),dtype=float)
-        dummy = [self.readSnapshot(iz,property) for iz in self.snapshot]
-        HDF.close()
+        dummy = [self.storeSnapshot(iz,property) for iz in self.snapshot]
         return
         
     def getPowerSpectrumAtRedshift(self,z,property="nonLinearPk",snapToSnapshot=False,**kwargs):
         if snapToSnapshot:
             iz = np.argmin(np.fabs(self.redshift-z))
-            HDF = HDF5(self.datafile,'r')
-            pk = self.readSnapshot(HDF,self.snapshot[iz],property)
-            HDF.close()
+            HDF = HDF5(self.filename,'r')
+            pk = self.readSnapshot(self.snapshot[iz],property)
         else:            
             self.read(property)
+            print self.zPk
             f = interp1d(self.redshift,self.zPk,**kwargs)
             pk = 10.0**f(z)
         return pk
