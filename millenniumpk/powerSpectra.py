@@ -44,7 +44,7 @@ class powerSpectrum(object):
             np.place(result,mask,0.0)
         return result
 
-   def computeSigma8(self,h0=1.0,verbose=False):
+    def computeSigma8(self,h0=1.0,verbose=False):
         dk = self.k[1] - self.k[0]
         values = self.pk(self.k)*(self.getFourierWindow(8.0,h0=h0)*self.k)**2
         sigma8 = romb(values,dx=dk,show=verbose)/dk
