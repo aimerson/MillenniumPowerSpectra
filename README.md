@@ -10,3 +10,6 @@ python setup.py build
 python setup.py install
 ```
 Users without root access may need to replace the final step with `python setup.py install --user`.
+
+# Example usage
+A script to show example usage is provided in the *examples* subdirectory.
