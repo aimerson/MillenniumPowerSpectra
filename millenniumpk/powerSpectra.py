@@ -119,7 +119,7 @@ class MillenniumPowerSpectrum(HDF5):
             pk = self.readSnapshot(self.snapshot[iz],property)
         else:            
             self.read(property)
-            print self.zPk
+            print(self.zPk)
             f = interp1d(self.redshift,self.zPk,**kwargs)
             pk = 10.0**f(z)
         return pk
